@@ -1,35 +1,43 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { supabase } from './supabaseClient';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [username, setUsername] = useState('');
+  const [user, setUser] = useState(null);
+
+  async function handleLogin() {
+    if(!username) return;
+    
+    // Check if the user already exist
+    const{data: existingUser}= await supabase.from('users').select('*').eq('username',username).single();
+
+    if(existingUser){
+      setUser(existingUser);
+    }
+    else{
+      const{data: newUser, error: insertError} = await supabase.from('users').insert({username}).select().single();
+      if(insertError){
+         console.error(insertError);
+         return;
+      }
+      setUser(newUser);
+    }
+
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Cryvia</h1>
+      {!user ? (
+        <div>
+          <input placeholder="Enter Username" value={username} onChange={(e) => setUsername(e.target.value)}></input>
+          <button onClick={handleLogin}>Log in</button>
+        </div>) 
+        : (
+        <h2>Welcome, {user.username} </h2>
+        )}
+    </div>
+  );
 }
 
 export default App
