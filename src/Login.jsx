@@ -14,7 +14,6 @@ function Login({setUser}) {
 
     if(existingUser){
       setUser(existingUser);
-      console.log("navigating to dashboard")
       navigate('/dashboard');
     }
     else{
@@ -24,11 +23,8 @@ function Login({setUser}) {
          return;
       }
       setUser(newUser);
-      console.log("navigating to dashboard")
       navigate('/dashboard');
-
     }
-
   }
 
   return (
