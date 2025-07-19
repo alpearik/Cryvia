@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
 
-function Dashboard({ user }) {
+function Dashboard({user}){
   const [assets, setAssets] = useState([]);
 
-  useEffect(() => {fetchAssets();}, []);
+  useEffect(() => {
+    fetchAssets();
+}, []);
 
-  async function fetchAssets() {
-    const { data:assetsUser, error:fetchError } = await supabase.from('assets').select('*').eq('user_id', user.id);
+  async function fetchAssets(){
+    const { data:assetsUser, error:fetchError } = await supabase
+    .from('assets')
+    .select('*')
+    .eq('user_id', user.id);
 
     if (fetchError) {
       console.error("Error fetching assets:", fetchError);
