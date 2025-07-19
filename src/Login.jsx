@@ -23,6 +23,12 @@ function Login({setUser}) {
          return;
       }
       setUser(newUser);
+
+      const { error: assetError } = await supabase.from('assets').insert({user_id: newUser.id,symbol: 'usdt',amount: 1000,});
+
+      if (assetError) {
+        console.error("Error assigning wallet :", assetError);
+      }
       navigate('/dashboard');
     }
   }
