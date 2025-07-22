@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from './supabaseClient';
+import CryptoCard from './components/CryptoCard';
 
 function Dashboard({user}){
   //const API_KEY = import.meta.env.VITE_CMC_API_KEY;
