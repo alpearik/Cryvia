@@ -32,20 +32,30 @@ function Dashboard({user}){
       SOL: 'solana',
       USDT: 'tether'
     };
-    
-    const coinIds = assetList
-    .map(a => idsMap[a.symbol.toUpperCase()])
-    .filter(Boolean)
-    .join(',');
+    const allSymbols = Object.keys(idsMap);
 
+    const userAssetsMap = {};
+    assetList.forEach(a => {
+      userAssetsMap[a.symbol.toUpperCase()] = a;
+    });
+
+    const fullAssetList = allSymbols.map(symbol => {
+      return userAssetsMap[symbol] || { symbol, amount: 0 };
+    });
+    
+    const coinIds = allSymbols.map(symbol => idsMap[symbol]).join(',');
+
+    console.log("Fetching prices for IDs:", coinIds);
 
     try {
       const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=usd`);
       const result = await res.json();
       
+      console.log("Price API result:", result);
+      
       let total = 0;
       const newPrices = {};
-      for (let asset of assetList) {
+      for (let asset of fullAssetList) {
         const symbol = asset.symbol.toUpperCase();
         const id = idsMap[symbol];
         const price = result[id]?.usd || 0;
@@ -53,8 +63,10 @@ function Dashboard({user}){
         total += asset.amount * price;
       }
 
+
       setPrices(newPrices);
       setTotalValue(total);
+      setAssets(fullAssetList);
     } catch (error) {
       console.error("Error fetching prices:", error);
     }
