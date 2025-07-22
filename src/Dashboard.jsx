@@ -3,11 +3,10 @@ import { supabase } from './supabaseClient';
 import CryptoCard from './components/CryptoCard';
 
 function Dashboard({user}){
-  //const API_KEY = import.meta.env.VITE_CMC_API_KEY;
 
   const [assets, setAssets] = useState([]);
   const [totalValue, setTotalValue] = useState(0);
-
+  const [prices, setPrices] = useState({});
 
   useEffect(() => {
     fetchAssets();
@@ -45,32 +44,47 @@ function Dashboard({user}){
       const result = await res.json();
       
       let total = 0;
+      const newPrices = {};
       for (let asset of assetList) {
         const symbol = asset.symbol.toUpperCase();
         const id = idsMap[symbol];
         const price = result[id]?.usd || 0;
+        newPrices[symbol] = price;
         total += asset.amount * price;
       }
 
+      setPrices(newPrices);
       setTotalValue(total);
     } catch (error) {
       console.error("Error fetching prices:", error);
     }
   }
 
+  const handleBuy = (symbol) => {
+    alert(`Buy ${symbol}`);
+  };
+
+  const handleSell = (symbol) => {
+    alert(`Sell ${symbol}`);
+  };
+
   return (
     <div>
       <h2>Welcome {user.username}</h2>
 
       <h2>Your Wallet:</h2>
-      <ul>
+        <div>
         {assets.map((asset) => (
-          <li key={asset.symbol}>
-            {asset.symbol.toUpperCase()}: {asset.amount}
-          </li>
+          <CryptoCard
+            key={asset.symbol}
+            asset={asset}
+            currentPrice={prices[asset.symbol.toUpperCase()]}
+            onBuy={handleBuy}
+            onSell={handleSell}
+          />
         ))}
-      </ul>
-      <h2>Total value: ${totalValue}</h2>
+      </div>
+      <h2>Total value: ${totalValue.toFixed(2)}</h2>
     </div>
   );
 }
