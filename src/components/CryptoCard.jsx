@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CryptoCard = ({ asset, currentPrice, onBuy, onSell }) => {
+const CryptoCard = ({asset, currentPrice, onBuy, onSell}) => {
   return (
     <div>
       <div>

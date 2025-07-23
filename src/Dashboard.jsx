@@ -45,14 +45,10 @@ function Dashboard({user}){
     
     const coinIds = allSymbols.map(symbol => idsMap[symbol]).join(',');
 
-    console.log("Fetching prices for IDs:", coinIds);
-
     try {
       const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=usd`);
       const result = await res.json();
-      
-      console.log("Price API result:", result);
-      
+            
       let total = 0;
       const newPrices = {};
       for (let asset of fullAssetList) {
@@ -62,7 +58,6 @@ function Dashboard({user}){
         newPrices[symbol] = price;
         total += asset.amount * price;
       }
-
 
       setPrices(newPrices);
       setTotalValue(total);
