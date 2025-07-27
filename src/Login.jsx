@@ -7,10 +7,15 @@ function Login({setUser}){
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
 
+  /**
+   * Handle login
+   * 
+   * Handles login logic: checks if user exists, otherwise creates a new user and assigns initial wallet.
+   */
+
   async function handleLogin(){
     if(!username) return;
     
-    // Check if the user already exist
     const{data: existingUser}= await supabase
     .from('users')
     .select('*')

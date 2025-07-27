@@ -14,6 +14,13 @@ function Dashboard({user}){
     fetchHistory();
 }, []);
 
+  /**
+   * Fetch assets
+   * 
+   * Retrieves the user's crypto assets.
+   * 
+   */
+
   async function fetchAssets(){
     const { data:assetsUser, error:fetchError } = await supabase
     .from('assets')
@@ -27,6 +34,13 @@ function Dashboard({user}){
       calculateTotalValue(assetsUser);
     }
   }
+
+  /**
+   * Fetch history
+   * 
+   * Retrieves user's transaction history.
+   */
+
   async function fetchHistory() {
     const { data: historyData, error: historyError } = await supabase
       .from('history')
@@ -40,6 +54,14 @@ function Dashboard({user}){
       setHistory(historyData);
     }
   }
+
+  /**
+   * Calculate total value
+   * 
+   * Calculates the total value of the user's assets based on current prices.
+   * 
+   * @param {Array} assetList - List of user's assets.
+   */
 
   async function calculateTotalValue(assetList) {
     const idsMap = {
@@ -83,6 +105,18 @@ function Dashboard({user}){
     }
   }
 
+  /**
+   * Record transaction
+   * 
+   * Records a transaction in the history table.
+   * 
+   * @param {string} symbol - The asset symbol.
+   * @param {string} type - The transaction type ('buy' or 'sell').
+   * @param {number} amount - The amount of the asset.
+   * @param {number} price - The price at which the transaction occurred.
+   * @returns {boolean} - Returns true if the transaction was recorded successfully, false otherwise
+   */
+
   async function recordTransaction(symbol, type, amount, price) {
     const { error } = await supabase
       .from('history')
@@ -103,6 +137,15 @@ function Dashboard({user}){
     return true;
   }
 
+  /**
+   * Handle buy
+   * 
+   * Executes a buy transaction for a crypto asset.
+   * 
+   * @param {string} symbol 
+   * @param {number} amount 
+   */
+  
   async function handleBuy(symbol, amount) {
     if (!amount || amount <= 0) {
       alert('Please enter a valid amount');
@@ -160,6 +203,15 @@ function Dashboard({user}){
       alert('Error processing buy transaction');
     }
   }
+
+  /**
+   * Handle sell
+   * 
+   * Executes a sell transaction for a crypto asset.
+   * 
+   * @param {string} symbol
+   * @param {number} amount
+   */
 
   async function handleSell(symbol, amount) {
     if (!amount || amount <= 0) {
