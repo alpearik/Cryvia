@@ -7,9 +7,11 @@ function Dashboard({user}){
   const [assets, setAssets] = useState([]);
   const [totalValue, setTotalValue] = useState(0);
   const [prices, setPrices] = useState({});
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     fetchAssets();
+    fetchHistory();
 }, []);
 
   async function fetchAssets(){
@@ -25,6 +27,20 @@ function Dashboard({user}){
       calculateTotalValue(assetsUser);
     }
   }
+  async function fetchHistory() {
+    const { data: historyData, error: historyError } = await supabase
+      .from('history')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('timestamp', { ascending: false });
+
+    if (historyError) {
+      console.error("Error fetching history:", historyError);
+    } else {
+      setHistory(historyData);
+    }
+  }
+
   async function calculateTotalValue(assetList) {
     const idsMap = {
       BTC: 'bitcoin',
@@ -65,6 +81,26 @@ function Dashboard({user}){
     } catch (error) {
       console.error("Error fetching prices:", error);
     }
+  }
+
+  async function recordTransaction(symbol, type, amount, price) {
+    const { error } = await supabase
+      .from('history')
+      .insert({
+        user_id: user.id,
+        symbol: symbol.toLowerCase(),
+        type,
+        amount,
+        price,
+        timestamp: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error recording transaction:', error);
+      return false;
+    }
+    await fetchHistory();
+    return true;
   }
 
   async function handleBuy(symbol, amount) {
@@ -116,7 +152,7 @@ function Dashboard({user}){
           return;
         }
       }
-
+      await recordTransaction(symbol, 'buy', amount, prices[symbol.toUpperCase()]);
       await fetchAssets();
       alert(`Successfully bought ${amount} ${symbol}`);
     } catch (error) {
@@ -183,7 +219,7 @@ function Dashboard({user}){
           return;
         }
       }
-
+      await recordTransaction(symbol, 'sell', amount, prices[symbol.toUpperCase()]);
       await fetchAssets();
       alert(`Successfully sold ${amount} ${symbol}`);
     } catch (error) {
@@ -209,6 +245,37 @@ function Dashboard({user}){
         ))}
       </div>
       <h2>Total value: ${totalValue.toFixed(2)}</h2>
+    <h2>Trading History:</h2>
+      <div>
+        {history.length === 0 ? (
+          <p>No transactions yet</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td>{transaction.symbol.toUpperCase()}</td>
+                  <td>{transaction.type.toUpperCase()}</td>
+                  <td>{transaction.amount}</td>
+                  <td>${transaction.price.toFixed(2)}</td>
+                  <td>${(transaction.amount * transaction.price).toFixed(2)}</td>
+                  <td>{new Date(transaction.timestamp).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }
