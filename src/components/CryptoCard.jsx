@@ -1,13 +1,14 @@
 import React from 'react';
 import {useState} from 'react';
 
-const CryptoCard = ({asset, currentPrice, onBuy, onSell}) => {
+const CryptoCard = ({asset, currentPrice, image, onBuy, onSell}) => {
   const [buyAmount, setBuyAmount] = useState('');
   const [sellAmount, setSellAmount] = useState('');
 
   return (
     <div>
       <div>
+        <img src={image} alt={asset.symbol} width={40} height={40} />
         <h3>{asset.symbol.toUpperCase()}</h3>
         <p>Amount: {asset.amount.toFixed(4)}</p>
         <p>Price: ${currentPrice ? currentPrice.toFixed(2) : '0'}</p>

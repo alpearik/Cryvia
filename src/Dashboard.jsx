@@ -64,46 +64,60 @@ function Dashboard({user}){
    */
 
   async function calculateTotalValue(assetList) {
-    const idsMap = {
-      BTC: 'bitcoin',
-      ETH: 'ethereum',
-      SOL: 'solana',
-      USDT: 'tether'
-    };
-    const allSymbols = Object.keys(idsMap);
+  const idsMap = {
+    BTC: 'bitcoin',
+    ETH: 'ethereum',
+    SOL: 'solana',
+    USDT: 'tether'
+  };
 
-    const userAssetsMap = {};
-    assetList.forEach(a => {
-      userAssetsMap[a.symbol.toUpperCase()] = a;
+  const allSymbols = Object.keys(idsMap);
+
+  const userAssetsMap = {};
+  assetList.forEach(a => {
+    userAssetsMap[a.symbol.toUpperCase()] = a;
+  });
+
+  const fullAssetList = allSymbols.map(symbol => {
+    return userAssetsMap[symbol] || { symbol, amount: 0 };
+  });
+
+  const coinIds = allSymbols.map(symbol => idsMap[symbol]).join(',');
+
+  try {
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}`);
+    const result = await res.json();
+
+    let total = 0;
+    const newPrices = {};
+
+    const updatedAssets = fullAssetList.map(asset => {
+      const symbol = asset.symbol.toUpperCase();
+      const coinData = result.find(c => c.id === idsMap[symbol]);
+
+      const price = coinData?.current_price || 0;
+      const image = coinData?.image || '';
+
+      newPrices[symbol] = {
+        price,
+        image
+      };
+
+      total += asset.amount * price;
+
+      return Object.assign({}, asset, { image: image });
     });
 
-    const fullAssetList = allSymbols.map(symbol => {
-      return userAssetsMap[symbol] || { symbol, amount: 0 };
-    });
-    
-    const coinIds = allSymbols.map(symbol => idsMap[symbol]).join(',');
-
-    try {
-      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinIds}&vs_currencies=usd`);
-      const result = await res.json();
-            
-      let total = 0;
-      const newPrices = {};
-      for (let asset of fullAssetList) {
-        const symbol = asset.symbol.toUpperCase();
-        const id = idsMap[symbol];
-        const price = result[id]?.usd || 0;
-        newPrices[symbol] = price;
-        total += asset.amount * price;
-      }
-
-      setPrices(newPrices);
-      setTotalValue(total);
-      setAssets(fullAssetList);
-    } catch (error) {
-      console.error("Error fetching prices:", error);
-    }
+    setPrices(Object.fromEntries(
+      Object.entries(newPrices).map(([symbol, { price }]) => [symbol, price])
+    ));
+    setAssets(updatedAssets);
+    setTotalValue(total);
+  } catch (error) {
+    console.error("Error fetching prices and images:", error);
   }
+}
+
 
   /**
    * Record transaction
@@ -291,6 +305,7 @@ function Dashboard({user}){
             key={asset.symbol}
             asset={asset}
             currentPrice={prices[asset.symbol.toUpperCase()]}
+            image={asset.image}
             onBuy={handleBuy}
             onSell={handleSell}
           />
