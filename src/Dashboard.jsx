@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import CryptoCard from "./components/CryptoCard";
 import Logo from "./assets/logo.png";
+import { Link } from "react-router-dom";
 
 function Dashboard({ user }) {
   const [assets, setAssets] = useState([]);
@@ -330,7 +331,14 @@ function Dashboard({ user }) {
 
       <div className="flex flex-col flex-1">
         <div className="flex justify-between items-center px-5 py-6 border-b border-[#333]">
-          <span className="text-[#aaa]">Dashboard</span>
+          <div className="flex gap-4">
+            <Link to="/dashboard" className="text-[#aaa] hover:text-white">
+              Dashboard
+            </Link>
+            <Link to="/leaderboard" className="text-[#aaa] hover:text-white">
+              Leaderboard
+            </Link>
+          </div>
           <div className="flex items-center gap-4">
             <span>{user.username}</span>
           </div>
