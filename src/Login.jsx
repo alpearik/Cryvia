@@ -5,44 +5,58 @@ import Logo from "./assets/logo.png";
 
 function Login({ setUser }) {
   const [username, setUsername] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState(null); 
   const navigate = useNavigate();
 
   /**
    * Handle login
    *
-   * Handles login logic: checks if user exists, otherwise creates a new user and assigns initial wallet.
+   * Checks if the user exists with the provided username and PIN.
    */
 
   async function handleLogin() {
-    if (!username) return;
 
-    const { data: existingUser } = await supabase
+    if (!username || !pin) {
+      setError("Please enter both username and PIN.");
+      return;
+    }
+
+    const { data: existingUser, error: userError } = await supabase
       .from("users")
       .select("*")
       .eq("username", username)
+      .eq("pin", pin) 
       .single();
 
-    if (existingUser) {
-      setUser(existingUser);
-      navigate("/dashboard");
-    } else {
+    if (userError || !existingUser) {
+
       const { data: newUser, error: insertError } = await supabase
         .from("users")
-        .insert({ username })
+        .insert({ username, pin }) 
         .select()
         .single();
 
       if (insertError) {
+        setError("Error creating user: " + insertError.message);
         console.error(insertError);
         return;
       }
+
       setUser(newUser);
 
       const { error: assetError } = await supabase
         .from("assets")
         .insert({ user_id: newUser.id, symbol: "usdt", amount: 1000 });
 
-      if (assetError) console.error("Error assigning wallet :", assetError);
+      if (assetError) {
+        setError("Error assigning wallet: " + assetError.message);
+        console.error("Error assigning wallet:", assetError);
+      }
+
+      navigate("/dashboard");
+    } else {
+      setUser(existingUser);
       navigate("/dashboard");
     }
   }
@@ -62,6 +76,9 @@ function Login({ setUser }) {
         </div>
 
         <div className="w-full space-y-6">
+          {error && (
+            <div className="text-red-500 text-sm text-center">{error}</div>
+          )}
           <div className="space-y-2">
             <label className="text-gray-300 text-base sm:text-lg font-medium block">
               Username
@@ -70,6 +87,19 @@ function Login({ setUser }) {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-gray-900/80 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all duration-300 hover:bg-gray-800/90"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-gray-300 text-base sm:text-lg font-medium block">
+              PIN <span className="text-sm text-gray-500">(4 digits)</span>
+            </label>
+            <input
+              type="password"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              maxLength={4}
               className="w-full px-4 py-3 text-sm sm:text-base rounded-xl bg-gray-900/80 border border-white/30 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all duration-300 hover:bg-gray-800/90"
             />
           </div>
