@@ -35,13 +35,13 @@ function LeaderBoard({ user }) {
       return;
     }
 
-    const assetsByUser = assets.reduce((acc, asset) => {
-      if (!acc[asset.user_id]) {
-        acc[asset.user_id] = [];
-      }
-      acc[asset.user_id].push(asset);
-      return acc;
-    }, {});
+    const assetsByUser = {};
+    assets.forEach(asset => {
+    if (!assetsByUser[asset.user_id]) {
+      assetsByUser[asset.user_id] = [];
+    }
+    assetsByUser[asset.user_id].push(asset);
+    });
 
     const idsMap = {
       BTC: "bitcoin",
