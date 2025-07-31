@@ -59,7 +59,7 @@ function Login({ setUser }) {
           setError("Incorrect PIN. Please try again.");
           return;
        }
-      setUser(existingUser);
+      setUser(userCheck);
       navigate("/dashboard");
     }
   }
