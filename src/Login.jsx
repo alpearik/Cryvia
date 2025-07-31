@@ -22,14 +22,13 @@ function Login({ setUser }) {
       return;
     }
 
-    const { data: existingUser, error: userError } = await supabase
+    const { data: userCheck, error: userError } = await supabase
       .from("users")
       .select("*")
       .eq("username", username)
-      .eq("pin", pin) 
       .single();
 
-    if (userError || !existingUser) {
+    if (userError || !userCheck) {
 
       const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -56,6 +55,10 @@ function Login({ setUser }) {
 
       navigate("/dashboard");
     } else {
+       if (userCheck.pin !== pin) {
+          setError("Incorrect PIN. Please try again.");
+          return;
+       }
       setUser(existingUser);
       navigate("/dashboard");
     }
