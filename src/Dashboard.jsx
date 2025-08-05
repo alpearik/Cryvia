@@ -166,6 +166,26 @@ function Dashboard({ user }) {
   }
 
   /**
+   * Update asset
+   * 
+   * Updates the amount of an asset for a user.
+   * 
+   * @param {string} userId 
+   * @param {string} symbol 
+   * @param {number} amount 
+   * @returns {Promise}
+   */
+
+  async function updateAsset(userId, symbol, amount) {
+  return supabase
+    .from("assets")
+    .update({ amount })
+    .eq("user_id", userId)
+    .eq("symbol", symbol.toLowerCase());
+}
+
+
+  /**
    * Handle buy
    *
    * Executes a buy transaction for a crypto asset.
@@ -189,11 +209,7 @@ function Dashboard({ user }) {
     }
 
     try {
-      const { error: usdtError } = await supabase
-        .from("assets")
-        .update({ amount: usdtAsset.amount - cost })
-        .eq("user_id", user.id)
-        .eq("symbol", "usdt");
+      const { error: usdtError } = await updateAsset(user.id, "usdt", usdtAsset.amount - cost);
 
       if (usdtError) {
         console.log("error:", usdtError);
@@ -204,11 +220,7 @@ function Dashboard({ user }) {
         (a) => a.symbol.toUpperCase() === symbol.toUpperCase()
       );
       if (existingAsset && existingAsset.amount > 0) {
-        const { error: updateError } = await supabase
-          .from("assets")
-          .update({ amount: existingAsset.amount + amount })
-          .eq("user_id", user.id)
-          .eq("symbol", symbol.toLowerCase());
+        const { error: updateError } = await updateAsset(user.id, symbol.toLowerCase(), existingAsset.amount + amount);
 
         if (updateError) {
           console.log("error:", updateError);
@@ -271,11 +283,7 @@ function Dashboard({ user }) {
           .eq("user_id", user.id)
           .eq("symbol", symbol.toLowerCase());
       } else {
-        assetUpdate = await supabase
-          .from("assets")
-          .update({ amount: newAmount })
-          .eq("user_id", user.id)
-          .eq("symbol", symbol.toLowerCase());
+        assetUpdate = await updateAsset(user.id, symbol.toLowerCase(), newAmount);
       }
 
       if (assetUpdate.error) {
@@ -286,12 +294,7 @@ function Dashboard({ user }) {
       const proceeds = amount * prices[symbol.toUpperCase()];
 
       if (usdtAsset) {
-        const { error: usdtError } = await supabase
-          .from("assets")
-          .update({ amount: usdtAsset.amount + proceeds })
-          .eq("user_id", user.id)
-          .eq("symbol", "usdt");
-
+        const { error: usdtError } = await updateAsset(user.id, "usdt", usdtAsset.amount + proceeds);
         if (usdtError) {
           console.log("error:", usdtError);
           return;
