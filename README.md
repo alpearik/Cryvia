@@ -1,9 +1,7 @@
-<table>
-  <tr>
-    <td><img src="src/assets/logo.png" width="100" alt="Cryvia Logo" /></td>
-    <td><h1 style="margin-left: 10px;">Cryvia</h1></td>
-  </tr>
-</table>
+<div align="center">
+  <img src="src/assets/logo.png" width="100" alt="Cryvia Logo" />
+  <h1>Cryvia</h1>
+</div>
 
 
 
@@ -40,6 +38,8 @@ Input a 4-digit PIN (e.g., 1234) into the PIN field. This acts as your login cre
 - **Buy/Sell**  
 
 - **Transaction History**  
+
+- **Leaderboard**  
 
 ---
 
@@ -135,3 +135,7 @@ To run the project locally:
 
    ```bash
    npm run dev
+
+## 👨‍💻 Author
+
+<a href="https://github.com/alpearik">@alpearik</a>
